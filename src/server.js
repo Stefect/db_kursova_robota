@@ -107,7 +107,7 @@ app.get('/:name(products|suppliers|locations|orders|stock|movements)', async (re
   try {
     const cfg = lists[req.params.name];
     const result = await query(cfg.sql);
-    res.render('table', { ...cfg, rows: result.rows });
+    res.render('table', { action: null, ...cfg, rows: result.rows });
   } catch (err) {
     next(err);
   }
