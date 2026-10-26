@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title><%= title %> - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/">Головна</a> |
+    <a href="/products">Товари</a> |
+    <a href="/suppliers">Постачальники</a> |
+    <a href="/locations">Комірки</a> |
+    <a href="/orders">Накладні</a> |
+    <a href="/stock">Залишки</a> |
+    <a href="/movements">Журнал</a>
+  </nav>
+  <h1><%= title %></h1>
+  <% if (action) { %>
+    <p><a class="btn" href="<%= action.href %>"><%= action.label %></a></p>
+  <% } %>
+  <table>
+    <thead>
+      <tr><% columns.forEach(c => { %><th><%= c.label %></th><% }) %></tr>
+    </thead>
+    <tbody>
+      <% if (rows.length === 0) { %>
+        <tr><td colspan="<%= columns.length %>">Немає даних</td></tr>
+      <% } %>
+      <% rows.forEach(r => { %>
+        <tr>
+          <% columns.forEach(c => { %><td><%= r[c.key] instanceof Date ? r[c.key].toLocaleString('uk-UA') : (r[c.key] ?? '') %></td><% }) %>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

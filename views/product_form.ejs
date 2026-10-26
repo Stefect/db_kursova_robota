@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Новий товар - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav><a href="/">Головна</a> | <a href="/products">Товари</a></nav>
+  <h1>Новий товар</h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <form method="post" action="/products">
+    <label>Артикул * <input name="sku_code" required maxlength="50" value="<%= values.sku_code || '' %>"></label>
+    <label>Назва * <input name="name" required maxlength="100" value="<%= values.name || '' %>"></label>
+    <label>Опис <textarea name="description"><%= values.description || '' %></textarea></label>
+    <label>Одиниця виміру
+      <select name="unit">
+        <% ['piece','kg','liter','box','pallet'].forEach(u => { %>
+          <option value="<%= u %>" <%= values.unit === u ? 'selected' : '' %>><%= u %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Мінімальний залишок <input name="min_stock_level" type="number" min="0" value="<%= values.min_stock_level || 0 %>"></label>
+    <button type="submit">Зберегти</button>
+  </form>
+</body>
+</html>

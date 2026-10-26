@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
+nav { margin-bottom: 16px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
+th { background: #eee; }
+.btn, button { background: #2a6; color: #fff; padding: 6px 12px; border: 0; text-decoration: none; cursor: pointer; }
+form label { display: block; margin: 8px 0; }
+form input, form select, form textarea { display: block; width: 320px; padding: 4px; }
+.error { color: #b00; font-weight: bold; }
