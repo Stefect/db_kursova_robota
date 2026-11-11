@@ -108,7 +108,22 @@ const lists = {
   },
 };
 
-app.get('/', (req, res) => res.render('index'));
+app.get('/', async (req, res, next) => {
+  try {
+    const [p, s, o, m] = await Promise.all([
+      query('SELECT COUNT(*)::int AS cnt FROM product'),
+      query('SELECT COALESCE(SUM(quantity),0)::int AS total FROM inventory_stock'),
+      query('SELECT COUNT(*)::int AS cnt FROM supply_order'),
+      query('SELECT COUNT(*)::int AS cnt FROM inventory_movement'),
+    ]);
+    res.render('index', {
+      productsCnt: p.rows[0].cnt,
+      stockTotal: s.rows[0].total,
+      ordersCnt: o.rows[0].cnt,
+      movementsCnt: m.rows[0].cnt,
+    });
+  } catch (err) { next(err); }
+});
 
 app.get('/:name(products|suppliers|locations|orders|stock|movements)', async (req, res, next) => {
   try {

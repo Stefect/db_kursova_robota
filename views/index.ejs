@@ -6,15 +6,53 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <nav>
+    <a href="/">Головна</a> |
+    <a href="/products">Товари</a> |
+    <a href="/suppliers">Постачальники</a> |
+    <a href="/locations">Комірки</a> |
+    <a href="/orders">Накладні</a> |
+    <a href="/stock">Залишки</a> |
+    <a href="/movements">Журнал</a> |
+    <a href="/reports">Звіти</a>
+  </nav>
+
   <h1>WMS: облік складу</h1>
-  <ul>
-    <li><a href="/products">Товари</a></li>
-    <li><a href="/suppliers">Постачальники</a></li>
-    <li><a href="/locations">Комірки складу</a></li>
-    <li><a href="/orders">Накладні постачання</a> (<a href="/orders/new">+ нова</a>)</li>
-    <li><a href="/stock">Залишки по комірках</a></li>
-    <li><a href="/movements">Журнал переміщень і списань</a> (<a href="/movements/new">+ нова операція</a>)</li>
-    <li><a href="/reports">Аналітичні звіти (OLAP)</a></li>
-  </ul>
+  <p>Система адресного складського обліку та логістики (PostgreSQL + Node.js/Express).</p>
+
+  <div class="section" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
+    <div class="card">
+      <h3>Товари</h3>
+      <p style="font-size:28px; color:var(--primary); margin:0;"><%= productsCnt %></p>
+      <a class="btn" href="/products">Відкрити</a>
+    </div>
+    <div class="card">
+      <h3>Загальний залишок</h3>
+      <p style="font-size:28px; color:var(--primary); margin:0;"><%= stockTotal %></p>
+      <a class="btn" href="/stock">Відкрити</a>
+    </div>
+    <div class="card">
+      <h3>Накладні</h3>
+      <p style="font-size:28px; color:var(--primary); margin:0;"><%= ordersCnt %></p>
+      <a class="btn" href="/orders">Відкрити</a>
+    </div>
+    <div class="card">
+      <h3>Рухи/списання</h3>
+      <p style="font-size:28px; color:var(--primary); margin:0;"><%= movementsCnt %></p>
+      <a class="btn" href="/movements">Відкрити</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Швидкий доступ</h2>
+    <p>
+      <a class="btn" href="/products/new">+ Товар</a>
+      <a class="btn" href="/suppliers/new">+ Постачальник</a>
+      <a class="btn" href="/locations/new">+ Комірка</a>
+      <a class="btn" href="/orders/new">+ Накладна</a>
+      <a class="btn" href="/movements/new">+ Операція</a>
+      <a class="btn success" href="/reports">Звіти</a>
+    </p>
+  </div>
 </body>
 </html>
