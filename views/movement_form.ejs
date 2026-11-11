@@ -12,28 +12,28 @@
   <form method="post" action="/movements">
     <label>Тип операції *
       <select name="movement_type" id="mt" onchange="toggleTo()">
-        <option value="transfer">Переміщення (transfer)</option>
-        <option value="write_off">Списання (write_off)</option>
+        <option value="transfer" <%= (values.movement_type || 'transfer') === 'transfer' ? 'selected' : '' %>>Переміщення (transfer)</option>
+        <option value="write_off" <%= values.movement_type === 'write_off' ? 'selected' : '' %>>Списання (write_off)</option>
       </select>
     </label>
     <label>Товар *
       <select name="product_id" required>
         <% products.forEach(p => { %>
-          <option value="<%= p.product_id %>"><%= p.sku_code %> - <%= p.name %></option>
+          <option value="<%= p.product_id %>" <%= String(values.product_id) === String(p.product_id) ? 'selected' : '' %>><%= p.sku_code %> - <%= p.name %></option>
         <% }) %>
       </select>
     </label>
     <label>З комірки *
       <select name="from_location_id" required>
         <% locations.forEach(l => { %>
-          <option value="<%= l.location_id %>"><%= l.location_code %></option>
+          <option value="<%= l.location_id %>" <%= String(values.from_location_id) === String(l.location_id) ? 'selected' : '' %>><%= l.location_code %></option>
         <% }) %>
       </select>
     </label>
     <label id="toWrap">В комірку *
       <select name="to_location_id">
         <% locations.forEach(l => { %>
-          <option value="<%= l.location_id %>"><%= l.location_code %></option>
+          <option value="<%= l.location_id %>" <%= String(values.to_location_id) === String(l.location_id) ? 'selected' : '' %>><%= l.location_code %></option>
         <% }) %>
       </select>
     </label>
