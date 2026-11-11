@@ -1,9 +1,171 @@
-body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
-nav { margin-bottom: 16px; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
-th { background: #eee; }
-.btn, button { background: #2a6; color: #fff; padding: 6px 12px; border: 0; text-decoration: none; cursor: pointer; }
-form label { display: block; margin: 8px 0; }
-form input, form select, form textarea { display: block; width: 320px; padding: 4px; }
-.error { color: #b00; font-weight: bold; }
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --border: #e5e7eb;
+  --shadow: 0 4px 12px rgba(0,0,0,.06);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 24px;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+  backdrop-filter: blur(6px);
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: background .15s, color .15s;
+}
+
+nav a:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+h1 { font-size: 26px; margin: 0 0 16px; }
+h2 { font-size: 20px; margin: 24px 0 12px; color: var(--primary-dark); border-bottom: 2px solid var(--border); padding-bottom: 6px; }
+h3 { font-size: 16px; margin: 16px 0 8px; color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin: 12px 0;
+}
+
+th, td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: #f1f5f9;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .04em;
+}
+
+tbody tr:hover { background: #f8fafc; }
+tbody tr:last-child td { border-bottom: none; }
+
+.btn, button {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background .15s, transform .05s;
+}
+
+.btn:hover, button:hover { background: var(--primary-dark); }
+.btn:active, button:active { transform: translateY(1px); }
+
+button[type="submit"] { margin-top: 8px; }
+
+.danger { background: var(--danger); }
+.danger:hover { background: #b91c1c; }
+.success { background: var(--success); }
+.success:hover { background: #15803d; }
+
+form { max-width: 520px; }
+form label {
+  display: block;
+  margin: 12px 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+form input, form select, form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+form input:focus, form select:focus, form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+form textarea { min-height: 80px; resize: vertical; }
+
+.error {
+  color: var(--danger);
+  font-weight: 600;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+a { color: var(--primary); }
+a:hover { text-decoration: underline; }
+
+p { margin: 8px 0; color: var(--muted); }
+
+.section { margin-bottom: 28px; }
+
+@media (max-width: 720px) {
+  body { padding: 12px; }
+  th, td { padding: 8px; font-size: 13px; }
+  nav { position: static; }
+}
