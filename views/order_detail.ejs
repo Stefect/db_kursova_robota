@@ -11,9 +11,9 @@
   <p>Постачальник: <%= order.supplier %> | Дата: <%= new Date(order.supply_date).toLocaleString('uk-UA') %> | Статус: <%= order.status %> | Сума: <%= order.total_cost %></p>
   <h2>Позиції</h2>
   <table>
-    <thead><tr><th>Товар</th><th>Комірка</th><th>Кількість</th><th>Ціна</th><th>Партія</th><th>Термін</th></tr></thead>
+    <thead><tr><th>Товар</th><th>Комірка</th><th>Кількість</th><th>Ціна</th><th>Партія</th><th>Термін</th><th>Дії</th></tr></thead>
     <tbody>
-      <% if (items.length === 0) { %><tr><td colspan="6">Немає позицій</td></tr><% } %>
+      <% if (items.length === 0) { %><tr><td colspan="7">Немає позицій</td></tr><% } %>
       <% items.forEach(it => { %>
         <tr>
           <td><%= it.sku_code %> - <%= it.name %></td>
@@ -22,6 +22,13 @@
           <td><%= it.unit_price %></td>
           <td><%= it.batch_number %></td>
           <td><%= it.expiry_date ? new Date(it.expiry_date).toLocaleDateString('uk-UA') : '' %></td>
+          <td>
+            <% if (order.status === 'draft') { %>
+              <form method="post" action="/orders/<%= order.order_id %>/items/<%= it.product_id %>/delete" style="display:inline" onsubmit="return confirm('Видалити позицію?')">
+                <button type="submit">Видалити</button>
+              </form>
+            <% } %>
+          </td>
         </tr>
       <% }) %>
     </tbody>

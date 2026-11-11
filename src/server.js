@@ -407,19 +407,25 @@ app.post('/orders/:id/receive', async (req, res, next) => {
       await client.query('ROLLBACK');
       return res.status(400).send('Накладну без позицій не можна оприбуткувати. <a href="/orders">Назад</a>');
     }
+    // накопичення планованих надходжень по комірках (для перевірки місткості)
+    const planned = {};
     for (const it of items.rows) {
-      // перевірка місткості комірки (застосунковий контроль, як у ADR 0002)
+      planned[it.location_id] = (planned[it.location_id] || 0) + it.quantity;
+    }
+    for (const [locId, addQty] of Object.entries(planned)) {
       const cap = await client.query(
         `SELECT wl.max_capacity,
                 COALESCE((SELECT SUM(quantity) FROM inventory_stock WHERE location_id = $1),0)::int AS used
-         FROM warehouse_location wl WHERE wl.location_id = $1`, [it.location_id]);
+         FROM warehouse_location wl WHERE wl.location_id = $1`, [locId]);
       if (cap.rows.length) {
         const { max_capacity, used } = cap.rows[0];
-        if (used + it.quantity > max_capacity) {
+        if (used + addQty > max_capacity) {
           await client.query('ROLLBACK');
           return res.status(400).send(`Перевищено місткість комірки (використано ${used} з ${max_capacity}). <a href="/orders">Назад</a>`);
         }
       }
+    }
+    for (const it of items.rows) {
       await client.query(
         `INSERT INTO inventory_stock (product_id, location_id, quantity)
          VALUES ($1, $2, $3)
@@ -444,12 +450,54 @@ app.post('/orders/:id/cancel', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.post('/orders/:id/delete', async (req, res, next) => {
+app.post('/orders/:id/items/:productId/delete', async (req, res, next) => {
+  const client = await pool.connect();
   try {
-    await query('DELETE FROM supply_item WHERE order_id=$1', [req.params.id]);
-    await query('DELETE FROM supply_order WHERE order_id=$1', [req.params.id]);
+    await client.query('BEGIN');
+    const o = await client.query('SELECT status FROM supply_order WHERE order_id=$1', [req.params.id]);
+    if (o.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).send('Не знайдено. <a href="/orders">Назад</a>');
+    }
+    if (o.rows[0].status !== 'draft') {
+      await client.query('ROLLBACK');
+      return res.status(400).send('Видаляти позиції можна лише з чернетки. <a href="/orders">Назад</a>');
+    }
+    await client.query('DELETE FROM supply_item WHERE order_id=$1 AND product_id=$2', [req.params.id, req.params.productId]);
+    await client.query('UPDATE supply_order SET total_cost = (SELECT COALESCE(SUM(quantity*unit_price),0) FROM supply_item WHERE order_id=$1) WHERE order_id=$1', [req.params.id]);
+    await client.query('COMMIT');
+    res.redirect('/orders/' + req.params.id);
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    next(err);
+  } finally {
+    client.release();
+  }
+});
+
+app.post('/orders/:id/delete', async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const o = await client.query('SELECT status FROM supply_order WHERE order_id=$1', [req.params.id]);
+    if (o.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).send('Не знайдено. <a href="/orders">Назад</a>');
+    }
+    if (o.rows[0].status === 'received') {
+      await client.query('ROLLBACK');
+      return res.status(400).send('Неможливо видалити оприбутковану накладну (залишки вже змінено). <a href="/orders">Назад</a>');
+    }
+    await client.query('DELETE FROM supply_item WHERE order_id=$1', [req.params.id]);
+    await client.query('DELETE FROM supply_order WHERE order_id=$1', [req.params.id]);
+    await client.query('COMMIT');
     res.redirect('/orders');
-  } catch (err) { next(err); }
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    next(err);
+  } finally {
+    client.release();
+  }
 });
 
 // ---------------------------------------------------------------------
@@ -482,6 +530,12 @@ app.post('/movements', async (req, res, next) => {
       const locs = await query('SELECT location_id, location_code FROM warehouse_location ORDER BY location_code');
       return res.status(400).render('movement_form', { error: `Недостатньо залишку у відправника (доступно ${available})`, values: req.body, products: prods.rows, locations: locs.rows });
     }
+    if (movement_type === 'transfer' && fromId === toLoc) {
+      await client.query('ROLLBACK');
+      const prods = await query('SELECT product_id, sku_code, name FROM product ORDER BY sku_code');
+      const locs = await query('SELECT location_id, location_code FROM warehouse_location ORDER BY location_code');
+      return res.status(400).render('movement_form', { error: 'Відправник і отримувач мають бути різними комірками', values: req.body, products: prods.rows, locations: locs.rows });
+    }
     if (movement_type === 'transfer') {
       // перевірка місткості отримувача
       const cap = await client.query(
@@ -500,7 +554,7 @@ app.post('/movements', async (req, res, next) => {
     await client.query(
       `INSERT INTO inventory_movement (movement_type, product_id, from_location_id, to_location_id, quantity, reason, created_by)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [movement_type, pid, fromId, toLoc, qty, reason || null, created_by.trim()]
+      [movement_type, pid, fromId, toLoc, qty, reason || null, (created_by || '').trim()]
     );
     if (movement_type === 'transfer') {
       await client.query(`INSERT INTO inventory_stock (product_id, location_id, quantity) VALUES ($1,$2,0) ON CONFLICT (product_id, location_id) DO NOTHING`, [pid, fromId]);
