@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Звіти - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    section { margin-bottom: 2rem; }
+    table { border-collapse: collapse; width: 100%; margin: .5rem 0; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+<nav><a href="/">Головна</a> | <a href="/reports">Звіти</a></nav>
+<h1>Аналітичні звіти (OLAP)</h1>
+
+<section>
+  <h2>1. Загальна статистика</h2>
+  <p>Кількість товарів: <%= totalProducts.cnt %> | Загальний залишок: <%= totalStock.total %> | Середній min_stock_level: <%= avgMinStock.avg %></p>
+  <p>Місткість комірок: min <%= capacityStats.mn %>, max <%= capacityStats.mx %>, середня <%= capacityStats.avg %></p>
+  <h3>Накладні за статусом</h3>
+  <table><thead><tr><th>Статус</th><th>Кількість</th><th>Сума</th></tr></thead><tbody>
+    <% ordersByStatus.forEach(r => { %><tr><td><%= r.status %></td><td><%= r.cnt %></td><td><%= r.total_cost %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>2. Агрегація (GROUP BY)</h2>
+  <h3>2.1 Залишки по товарах</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Залишок</th></tr></thead><tbody>
+    <% stockByProduct.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+  <h3>2.2 Комірки за зонами</h3>
+  <table><thead><tr><th>Зона</th><th>Комірок</th><th>Сумарна місткість</th></tr></thead><tbody>
+    <% locationsByZone.forEach(r => { %><tr><td><%= r.zone %></td><td><%= r.locations_cnt %></td><td><%= r.total_cap %></td></tr><% }) %>
+  </tbody></table>
+  <h3>2.3 Рухи за типом і автором</h3>
+  <table><thead><tr><th>Тип</th><th>Автор</th><th>Кількість</th><th>Сума</th></tr></thead><tbody>
+    <% movementsByTypeAuthor.forEach(r => { %><tr><td><%= r.movement_type %></td><td><%= r.created_by %></td><td><%= r.cnt %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+  <h3>2.4 Середня ціна постачання за товаром (лише отримані)</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Постачань</th><th>Сер. ціна</th><th>Вартість</th></tr></thead><tbody>
+    <% avgPriceByProduct.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.supplies_cnt %></td><td><%= r.avg_price %></td><td><%= r.total_value %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>3. Фільтрація груп (HAVING)</h2>
+  <h3>3.1 Комірки із залишком > 100</h3>
+  <table><thead><tr><th>Комірка</th><th>Зона</th><th>Залишок</th></tr></thead><tbody>
+    <% locationsStockOver100.forEach(r => { %><tr><td><%= r.location_code %></td><td><%= r.zone %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+  <h3>3.2 Постачальники із сумою накладних > 30000</h3>
+  <table><thead><tr><th>Постачальник</th><th>Накладних</th><th>Сума</th></tr></thead><tbody>
+    <% suppliersOver30000.forEach(r => { %><tr><td><%= r.company_name %></td><td><%= r.orders_cnt %></td><td><%= r.total_cost %></td></tr><% }) %>
+  </tbody></table>
+  <h3>3.3 Товари у більше ніж одній комірці</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Комірок</th></tr></thead><tbody>
+    <% productsInMultipleLocations.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.locs_cnt %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>4. JOIN (різні типи)</h2>
+  <h3>4.1 INNER JOIN: накладні з постачальниками</h3>
+  <table><thead><tr><th>Номер</th><th>Постачальник</th><th>Сума</th><th>Статус</th></tr></thead><tbody>
+    <% innerOrdersSuppliers.forEach(r => { %><tr><td><%= r.order_number %></td><td><%= r.company_name %></td><td><%= r.total_cost %></td><td><%= r.status %></td></tr><% }) %>
+  </tbody></table>
+  <h3>4.2 LEFT JOIN: усі постачальники (навіть без накладних)</h3>
+  <table><thead><tr><th>Постачальник</th><th>Накладних</th></tr></thead><tbody>
+    <% leftSuppliers.forEach(r => { %><tr><td><%= r.company_name %></td><td><%= r.orders_cnt %></td></tr><% }) %>
+  </tbody></table>
+  <h3>4.3 RIGHT JOIN: усі комірки (навіть без позицій приймання)</h3>
+  <table><thead><tr><th>Комірка</th><th>Накладна (order_id)</th><th>Кількість</th></tr></thead><tbody>
+    <% rightLocationsItems.forEach(r => { %><tr><td><%= r.location_code %></td><td><%= r.order_id %></td><td><%= r.quantity %></td></tr><% }) %>
+  </tbody></table>
+  <h3>4.4 LEFT JOIN: товари із залишками та рухами</h3>
+  <table><thead><tr><th>SKU</th><th>Залишок</th><th>Рухів</th></tr></thead><tbody>
+    <% fullProductsStockMovements.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.stock_qty %></td><td><%= r.moves_cnt %></td></tr><% }) %>
+  </tbody></table>
+  <h3>4.5 CROSS JOIN + NOT EXISTS: пари (товар, комірка) без залишку</h3>
+  <table><thead><tr><th>SKU</th><th>Комірка</th></tr></thead><tbody>
+    <% crossMissingPairs.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.location_code %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>5. Підзапити</h2>
+  <h3>5.1 Скалярний: частка кожного товару в загальному залишку</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Залишок</th><th>Частка, %</th></tr></thead><tbody>
+    <% shareByProduct.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.total_qty %></td><td><%= r.share_pct %></td></tr><% }) %>
+  </tbody></table>
+  <h3>5.2 IN: товари зі скасованих накладних</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th></tr></thead><tbody>
+    <% productsFromCancelled.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td></tr><% }) %>
+  </tbody></table>
+  <h3>5.3 Табличний: товари у >1 комірці із середнім залишком</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Комірок</th><th>Сер. залишок</th></tr></thead><tbody>
+    <% productsInMultipleWithAvg.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.locs_cnt %></td><td><%= r.avg_qty %></td></tr><% }) %>
+  </tbody></table>
+  <h3>5.4 NOT EXISTS: товари без рухів</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th></tr></thead><tbody>
+    <% productsNoMovements.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td></tr><% }) %>
+  </tbody></table>
+  <h3>5.5 Підзапит у HAVING: товари з залишком нижче середнього</h3>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Залишок</th></tr></thead><tbody>
+    <% productsBelowAvgStock.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>6. Багатотаблична агрегація</h2>
+  <h3>6.1 Отримані постачання за постачальником</h3>
+  <table><thead><tr><th>Постачальник</th><th>Накладних</th><th>Вартість</th></tr></thead><tbody>
+    <% receivedBySupplier.forEach(r => { %><tr><td><%= r.company_name %></td><td><%= r.orders_cnt %></td><td><%= r.total_value %></td></tr><% }) %>
+  </tbody></table>
+  <h3>6.2 Вартість приймань за коміркою</h3>
+  <table><thead><tr><th>Комірка</th><th>Зона</th><th>Вартість</th></tr></thead><tbody>
+    <% valueByLocation.forEach(r => { %><tr><td><%= r.location_code %></td><td><%= r.zone %></td><td><%= r.total_value %></td></tr><% }) %>
+  </tbody></table>
+  <h3>6.3 Рухи за коміркою-відправником</h3>
+  <table><thead><tr><th>Комірка</th><th>Тип</th><th>Кількість</th><th>Сума</th></tr></thead><tbody>
+    <% movementsByFromLocation.forEach(r => { %><tr><td><%= r.location_code %></td><td><%= r.movement_type %></td><td><%= r.cnt %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>7. Віконні функції</h2>
+  <h3>7.1 DENSE_RANK за залишком</h3>
+  <table><thead><tr><th>Ранг</th><th>SKU</th><th>Назва</th><th>Залишок</th></tr></thead><tbody>
+    <% denseRankByStock.forEach(r => { %><tr><td><%= r.rnk %></td><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+<section>
+  <h2>8. Товари нижче мінімального залишку</h2>
+  <table><thead><tr><th>SKU</th><th>Назва</th><th>Мін. залишок</th><th>Факт. залишок</th></tr></thead><tbody>
+    <% if (lowStock.length === 0) { %><tr><td colspan="4">Немає товарів нижче мінімуму</td></tr><% } %>
+    <% lowStock.forEach(r => { %><tr><td><%= r.sku_code %></td><td><%= r.name %></td><td><%= r.min_stock_level %></td><td><%= r.total_qty %></td></tr><% }) %>
+  </tbody></table>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Постачальник - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav><a href="/">Головна</a> | <a href="/suppliers">Постачальники</a></nav>
+  <h1><%= values.supplier_id ? 'Редагування постачальника' : 'Новий постачальник' %></h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <form method="post" action="<%= values.supplier_id ? '/suppliers/' + values.supplier_id : '/suppliers' %>">
+    <label>Компанія * <input name="company_name" required maxlength="100" value="<%= values.company_name || '' %>"></label>
+    <label>Контактна особа * <input name="contact_person" required maxlength="100" value="<%= values.contact_person || '' %>"></label>
+    <label>Телефон * <input name="phone" required maxlength="20" value="<%= values.phone || '' %>" placeholder="+380..."></label>
+    <label>Email * <input name="email" type="email" required maxlength="100" value="<%= values.email || '' %>"></label>
+    <label>Адреса * <input name="address" required maxlength="255" value="<%= values.address || '' %>"></label>
+    <button type="submit">Зберегти</button>
+  </form>
+</body>
+</html>

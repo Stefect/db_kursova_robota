@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Переміщення/списання - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav><a href="/">Головна</a> | <a href="/movements">Журнал</a></nav>
+  <h1>Нове переміщення / списання</h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <form method="post" action="/movements">
+    <label>Тип операції *
+      <select name="movement_type" id="mt" onchange="toggleTo()">
+        <option value="transfer">Переміщення (transfer)</option>
+        <option value="write_off">Списання (write_off)</option>
+      </select>
+    </label>
+    <label>Товар *
+      <select name="product_id" required>
+        <% products.forEach(p => { %>
+          <option value="<%= p.product_id %>"><%= p.sku_code %> - <%= p.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>З комірки *
+      <select name="from_location_id" required>
+        <% locations.forEach(l => { %>
+          <option value="<%= l.location_id %>"><%= l.location_code %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label id="toWrap">В комірку *
+      <select name="to_location_id">
+        <% locations.forEach(l => { %>
+          <option value="<%= l.location_id %>"><%= l.location_code %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Кількість * <input name="quantity" type="number" min="1" required value="<%= values.quantity || 1 %>"></label>
+    <label>Причина <input name="reason" maxlength="255" value="<%= values.reason || '' %>"></label>
+    <label>Автор * <input name="created_by" required maxlength="100" value="<%= values.created_by || '' %>"></label>
+    <button type="submit">Зберегти</button>
+  </form>
+  <script>
+    function toggleTo() {
+      const v = document.getElementById('mt').value;
+      document.getElementById('toWrap').style.display = v === 'transfer' ? 'block' : 'none';
+    }
+    toggleTo();
+  </script>
+  <p><a href="/movements">Назад</a></p>
+</body>
+</html>

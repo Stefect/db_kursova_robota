@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Накладна - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav><a href="/">Головна</a> | <a href="/orders">Накладні</a></nav>
+  <h1>Нова накладна</h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <form method="post" action="/orders">
+    <label>Номер накладної * <input name="order_number" required maxlength="50" value="<%= values.order_number || '' %>"></label>
+    <label>Постачальник *
+      <select name="supplier_id" required>
+        <% suppliers.forEach(s => { %>
+          <option value="<%= s.supplier_id %>" <%= String(values.supplier_id) === String(s.supplier_id) ? 'selected' : '' %>><%= s.company_name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Дата постачання <input name="supply_date" type="datetime-local" value="<%= values.supply_date || '' %>"></label>
+    <label>Сума (total_cost) <input name="total_cost" type="number" step="0.01" min="0" value="<%= values.total_cost || 0 %>"></label>
+    <button type="submit">Створити (чернетка)</button>
+  </form>
+</body>
+</html>

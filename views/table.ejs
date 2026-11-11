@@ -13,7 +13,8 @@
     <a href="/locations">Комірки</a> |
     <a href="/orders">Накладні</a> |
     <a href="/stock">Залишки</a> |
-    <a href="/movements">Журнал</a>
+    <a href="/movements">Журнал</a> |
+    <a href="/reports">Звіти</a>
   </nav>
   <h1><%= title %></h1>
   <% if (action) { %>
@@ -21,15 +22,30 @@
   <% } %>
   <table>
     <thead>
-      <tr><% columns.forEach(c => { %><th><%= c.label %></th><% }) %></tr>
+      <tr>
+        <% columns.forEach(c => { %><th><%= c.label %></th><% }) %>
+        <% if (locals.editBase) { %><th>Дії</th><% } %>
+        <% if (locals.viewBase) { %><th>Перегляд</th><% } %>
+      </tr>
     </thead>
     <tbody>
       <% if (rows.length === 0) { %>
-        <tr><td colspan="<%= columns.length %>">Немає даних</td></tr>
+        <tr><td colspan="<%= columns.length + (locals.editBase ? 1 : 0) + (locals.viewBase ? 1 : 0) %>">Немає даних</td></tr>
       <% } %>
       <% rows.forEach(r => { %>
         <tr>
           <% columns.forEach(c => { %><td><%= r[c.key] instanceof Date ? r[c.key].toLocaleString('uk-UA') : (r[c.key] ?? '') %></td><% }) %>
+          <% if (locals.editBase) { %>
+            <td>
+              <a href="<%= locals.editBase %>/<%= r[locals.editKey || columns[0].key] %>/edit">Редагувати</a>
+              <form method="post" action="<%= locals.editBase %>/<%= r[locals.editKey || columns[0].key] %>/delete" style="display:inline" onsubmit="return confirm('Видалити?')">
+                <button type="submit">Видалити</button>
+              </form>
+            </td>
+          <% } %>
+          <% if (locals.viewBase) { %>
+            <td><a href="<%= locals.viewBase %>/<%= r[locals.viewKey || columns[0].key] %>">Відкрити</a></td>
+          <% } %>
         </tr>
       <% }) %>
     </tbody>

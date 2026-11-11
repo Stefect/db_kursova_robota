@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <title>Комірка - WMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav><a href="/">Головна</a> | <a href="/locations">Комірки</a></nav>
+  <h1><%= values.location_id ? 'Редагування комірки' : 'Нова комірка' %></h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+  <form method="post" action="<%= values.location_id ? '/locations/' + values.location_id : '/locations' %>">
+    <label>Код комірки * <input name="location_code" required maxlength="50" value="<%= values.location_code || '' %>"></label>
+    <label>Зона * <input name="zone" required maxlength="50" value="<%= values.zone || '' %>"></label>
+    <label>Стелаж * <input name="shelf_number" required maxlength="50" value="<%= values.shelf_number || '' %>"></label>
+    <label>Місткість * <input name="max_capacity" type="number" min="1" required value="<%= values.max_capacity || '' %>"></label>
+    <button type="submit">Зберегти</button>
+  </form>
+</body>
+</html>
