@@ -41,6 +41,11 @@
               <form method="post" action="<%= locals.editBase %>/<%= r[locals.editKey || columns[0].key] %>/delete" style="display:inline" onsubmit="return confirm('Видалити?')">
                 <button type="submit">Видалити</button>
               </form>
+              <% if (locals.editBase === '/suppliers') { %>
+              <form method="post" action="<%= locals.editBase %>/<%= r[locals.editKey || columns[0].key] %>/soft-delete" style="display:inline" onsubmit="return confirm('Деактивувати (soft delete)?')">
+                <button type="submit">Деактивувати</button>
+              </form>
+              <% } %>
             </td>
           <% } %>
           <% if (locals.viewBase) { %>
