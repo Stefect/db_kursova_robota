@@ -1,10 +1,7 @@
-const { Pool } = require('pg');
+require('dotenv').config();
+const knex = require('knex');
+const config = require('../knexfile');
 
-// Підключення до PostgreSQL. Рядок береться з .env (DATABASE_URL).
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = knex(config);
 
-async function query(text, params) {
-  return pool.query(text, params);
-}
-
-module.exports = { pool, query };
+module.exports = { db, knex };
