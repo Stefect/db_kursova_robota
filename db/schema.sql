@@ -24,7 +24,9 @@ CREATE TABLE supplier (
     contact_person VARCHAR(100) NOT NULL,
     phone          VARCHAR(20)  NOT NULL CHECK (phone LIKE '+%'),
     email          VARCHAR(100) NOT NULL UNIQUE,
-    address        VARCHAR(255) NOT NULL
+    address        VARCHAR(255) NOT NULL,
+    version        INTEGER      NOT NULL DEFAULT 1,
+    deleted_at     TIMESTAMP    NULL
 );
 
 CREATE TABLE product (
@@ -88,6 +90,14 @@ CREATE TABLE inventory_movement (
         OR (movement_type = 'write_off' AND to_location_id IS NULL)
     )
 );
+
+-- Індекси (вимога курсової: щонайменше 2-3 індекси)
+CREATE INDEX idx_supply_order_supplier ON supply_order (supplier_id);
+CREATE INDEX idx_supply_item_product ON supply_item (product_id);
+CREATE INDEX idx_supply_item_location ON supply_item (location_id);
+CREATE INDEX idx_inventory_stock_location ON inventory_stock (location_id);
+CREATE INDEX idx_inventory_movement_product_date ON inventory_movement (product_id, movement_date);
+CREATE INDEX idx_inventory_movement_from ON inventory_movement (from_location_id);
 
 -- Тестові дані (з лабораторної 2)
 INSERT INTO supplier (company_name, contact_person, phone, email, address) VALUES
