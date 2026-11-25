@@ -166,3 +166,25 @@ ORDER BY m.month DESC, m.total_value DESC;
 - CTE `monthly` обчислює агрегат по місяцях і постачальниках.
 - Зовнішній запит приєднує назву постачальника.
 - Демонструє використання `WITH` (Common Table Expression).
+
+---
+
+## Запит 8: Товари з рухами або залишками (UNION)
+
+Бізнес-питання: Які товари мають або залишки, або рухи по складу?
+
+SQL-запит:
+```sql
+SELECT p.sku_code, p.name
+FROM product p
+JOIN inventory_stock st ON st.product_id = p.product_id
+UNION
+SELECT p.sku_code, p.name
+FROM product p
+JOIN inventory_movement m ON m.product_id = p.product_id
+ORDER BY sku_code;
+```
+
+Пояснення:
+- UNION об'єднує результати двох запитів без дублікатів.
+- Демонструє операцію над множинами (set operation).

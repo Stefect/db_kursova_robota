@@ -29,8 +29,9 @@ erDiagram
 | email | VARCHAR(100) | NOT NULL, UNIQUE | Email |
 | address | VARCHAR(255) | NOT NULL | Адреса |
 | version | INTEGER | NOT NULL, DEFAULT 1 | Версія для оптимістичного блокування |
+| deleted_at | TIMESTAMP | NULL | Мітка м'якого видалення (NULL = активний) |
 
-Індекси: PK `supplier_pkey`.  
+Індекси: PK `supplier_pkey`, `idx_supplier_deleted_at`.  
 Зв'язки: один-до-багатьох з `supply_order`.
 
 ### Таблиця: `product`
@@ -60,7 +61,7 @@ erDiagram
 | max_capacity | INTEGER | NOT NULL, CHECK (>0) | Місткість |
 
 Обмеження: `uk_zone_shelf UNIQUE (zone, shelf_number)`.  
-Індекси: PK, UNIQUE `location_code`, UNIQUE `uk_zone_shelf`, `idx_inventory_stock_location`, `idx_inventory_movement_from`.  
+Індекси: PK, UNIQUE `location_code`, UNIQUE `uk_zone_shelf`, `idx_inventory_stock_location`, `idx_inventory_movement_from`, `idx_inventory_movement_to`.  
 Зв'язки: один-до-багатьох з `supply_item`, `inventory_stock`, `inventory_movement`.
 
 ### Таблиця: `supply_order`
@@ -130,4 +131,4 @@ PK: складений `(product_id, location_id)`.
 - **Тригери:** свідомо не використовуються (ADR 0002) — схема відповідає обсягу курсу (лекції 1–3). Цілісність стану (залишки, статуси, сума) забезпечується застосунком у транзакціях.
 - **Індексування:** додано індекси на FK і поля, що часто використовуються у фільтрах/JOIN/сортуванні (supplier_id, product_id, location_id, movement_date). PK/UNIQUE створюють власні індекси автоматично.
 - **Оптимістичне блокування:** колонка `version` у `supplier` для сценарію оновлення (ADR/лабораторна вимога).
-- **Soft delete:** не реалізовано свідомо — обрано жорстке видалення з обробкою FK (вимога допускає "або/або").
+- **Видалення:** жорстке видалення (hard delete) для товарів, комірок і накладних з обробкою FK-помилок; м'яке видалення (soft delete) для постачальників через колонку `deleted_at` (деактивація без втрати історії). Обидва підходи реалізовані.
